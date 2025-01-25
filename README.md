@@ -7,5 +7,6 @@ This project is inspired by the book [Crafting Interpreters](https://craftingint
 ✅ **Chapter 3: The Lox Language** \
 ✅ **Chapter 4: Scanning** \
 ✅ **Chapter 5: Representing Code** \
-🔄 **Chapter 6: Parsing Expressions** \
+✅ **Chapter 6: Parsing Expressions** \
+🔄 **Chapter 7: Evaluating Expressions** \
 🚧 Future chapters: Upcoming plans inshallah

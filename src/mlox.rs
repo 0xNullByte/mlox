@@ -1,16 +1,16 @@
-use crate::{error::MloxError, scanner::Scanner};
+use crate::{error::ScannerError, parser::Parser, scanner::Scanner};
 use std::io::Write;
 
 pub struct Mlox {
     args: Vec<String>,
-    error_handler: MloxError,
+    error_handler: ScannerError,
 }
 
 impl Mlox {
     pub fn new(args: Vec<String>) -> Self {
         Self {
             args,
-            error_handler: MloxError::default(),
+            error_handler: ScannerError::default(),
         }
     }
 
@@ -54,12 +54,14 @@ impl Mlox {
     }
 
     fn run(&mut self, src: String) {
-        let mut scanner = Scanner::new(&src, &mut self.error_handler);
         println!("src: {:?}", &src);
+        let mut scanner = Scanner::new(&src, &mut self.error_handler);
         scanner.scan_tokens();
-        for token in scanner.tokens {
-            println!("{:?}", token);
+        let mut parser = Parser::new(scanner.tokens);
+        if self.error_handler.had_err {
+            println!("There is a syntax error!");
+            return;
         }
-        if self.error_handler.had_err {}
+        parser.parse();
     }
 }

@@ -1,4 +1,4 @@
-use crate::error::MloxError;
+use crate::error::ScannerError;
 use crate::token::{Object, Token, TokenType};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -13,7 +13,7 @@ thread_local! {
                       ("for", TokenType::FOR),
                       ("fun", TokenType::FUN),
                       ("if", TokenType::IF),
-                      ("null", TokenType::NIL),
+                      ("null", TokenType::Null),
                       ("or", TokenType::OR),
                       ("print", TokenType::PRINT),
                       ("ret", TokenType::RETURN),
@@ -44,11 +44,11 @@ pub struct Scanner<'a> {
     line: usize,
 
     /// Error handle.
-    error: &'a mut MloxError,
+    error: &'a mut ScannerError,
 }
 
 impl<'a> Scanner<'a> {
-    pub fn new(source: &'a String, error: &'a mut MloxError) -> Self {
+    pub fn new(source: &'a String, error: &'a mut ScannerError) -> Self {
         Self {
             source,
             tokens: vec![],
@@ -69,7 +69,7 @@ impl<'a> Scanner<'a> {
 
     fn add_none_token(&mut self, token_type: TokenType) {
         self.tokens
-            .push(Token::new(token_type, "".into(), Object::None, self.line));
+            .push(Token::new(token_type, "".into(), Object::Null, self.line));
     }
 
     fn add_token(&mut self, token_type: TokenType, literal: Object) {

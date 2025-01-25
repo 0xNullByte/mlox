@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum TokenType {
     // Single-character tokens.
     LeftParen,
@@ -36,7 +36,7 @@ pub enum TokenType {
     FUN,
     FOR,
     IF,
-    NIL,
+    Null,
     OR,
     PRINT,
     RETURN,
@@ -49,28 +49,32 @@ pub enum TokenType {
     EOF,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Object {
     Str(String),
     Num(f64),
-    None,
+    False,
+    True,
+    Null,
 }
 impl Object {
     pub fn to_string(&self) -> String {
         match self {
-            Self::None => "None".into(),
+            Self::Null => "None".into(),
             Self::Str(v) => v.into(),
             Self::Num(n) => n.to_string(),
+            Self::True => "true".into(),
+            Self::False => "false".into(),
         }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Token {
-    token_type: TokenType,
+    pub token_type: TokenType,
     pub lexeme: String,
-    literal: Object,
-    line: usize,
+    pub literal: Object,
+    pub line: usize,
 }
 
 impl Token {
