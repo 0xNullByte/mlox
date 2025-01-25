@@ -55,11 +55,20 @@ pub enum Object {
     Num(f64),
     None,
 }
+impl Object {
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::None => "None".into(),
+            Self::Str(v) => v.into(),
+            Self::Num(n) => n.to_string(),
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct Token {
     token_type: TokenType,
-    lexeme: String,
+    pub lexeme: String,
     literal: Object,
     line: usize,
 }

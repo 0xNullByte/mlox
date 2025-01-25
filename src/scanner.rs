@@ -48,14 +48,14 @@ pub struct Scanner<'a> {
 }
 
 impl<'a> Scanner<'a> {
-    pub fn new(source: &'a String, _error: &'a mut MloxError) -> Self {
+    pub fn new(source: &'a String, error: &'a mut MloxError) -> Self {
         Self {
             source,
             tokens: vec![],
             start: 0,
             current: 0,
             line: 1,
-            error: _error,
+            error,
         }
     }
 
