@@ -6,5 +6,6 @@ This project is inspired by the book [Crafting Interpreters](https://craftingint
 ✅ **Chapter 2: A Map of the Territory** \
 ✅ **Chapter 3: The Lox Language** \
 ✅ **Chapter 4: Scanning** \
-🔄 **Chapter 5: Representing Code** \
+✅ **Chapter 5: Representing Code** \
+🔄 **Chapter 6: Parsing Expressions** \
 🚧 Future chapters: Upcoming plans inshallah
