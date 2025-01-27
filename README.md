@@ -8,7 +8,8 @@ This project is inspired by the book [Crafting Interpreters](https://craftingint
 ✅ **Chapter 4: Scanning** \
 ✅ **Chapter 5: Representing Code** \
 ✅ **Chapter 6: Parsing Expressions** \
-🔄 **Chapter 7: Evaluating Expressions** \
+✅ **Chapter 7: Evaluating Expressions** \
+🔄 **Chapter 8: Statements and State** \
 🚧 Future chapters: Upcoming plans inshallah
 
 # Mlox Grammar:
