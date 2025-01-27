@@ -42,3 +42,15 @@ unary          → ( "!" | "-" ) unary
 primary        → NUMBER | STRING | "true" | "false" | "null"
                | "(" expression ")" ;
 ```
+
+# Mlox's Built-in Types:
+```
+        Mlox         |    Rust representation
+----------------------------------------------------
+        Obj          |            <T>
+        null         |            None
+        bool         |            bool
+        Num          |            f64
+        Str          |            String
+```
+

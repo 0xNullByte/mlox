@@ -6,7 +6,7 @@ use crate::token::{Object, Token, TokenType};
 pub enum Expr {
     Binary(Result<Box<Expr>, Error>, Token, Result<Box<Expr>, Error>),
     Grouping(Result<Box<Expr>, Error>),
-    Literal(Box<Object>),
+    Literal(Object),
     Unary(Token, Result<Box<Expr>, Error>),
 }
 

@@ -53,8 +53,7 @@ pub enum TokenType {
 pub enum Object {
     Str(String),
     Num(f64),
-    False,
-    True,
+    Bool(bool),
     Null,
 }
 impl Object {
@@ -63,8 +62,7 @@ impl Object {
             Self::Null => "None".into(),
             Self::Str(v) => v.into(),
             Self::Num(n) => n.to_string(),
-            Self::True => "true".into(),
-            Self::False => "false".into(),
+            Self::Bool(b) => b.to_string(),
         }
     }
 }

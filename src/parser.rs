@@ -1,6 +1,7 @@
 use std::io::Error;
 
 use crate::{
+    eval::Evaluate,
     token::{Object, Token, TokenType},
     Expr,
 };
@@ -18,7 +19,8 @@ impl Parser {
     pub fn parse(&mut self) {
         let expr = self.expression();
         match expr {
-            Ok(expr) => expr.print_expr(),
+            Ok(expr) => Evaluate::new(expr).eval(),
+            // Ok(expr) => expr.print_expr(),
             Err(err) => println!("Error {err}",),
         };
     }
@@ -41,7 +43,7 @@ impl Parser {
         let mut expr = self.term();
         while self.match_next(&[
             TokenType::GREATER,
-            TokenType::GREATER,
+            TokenType::GreaterEqual,
             TokenType::LESS,
             TokenType::LessEqual,
         ]) {
@@ -91,7 +93,7 @@ impl Parser {
 
     fn term(&mut self) -> Result<Box<Expr>, Error> {
         let mut expr = self.factor();
-        while self.match_next(&[TokenType::MINUS, TokenType::PLUS]) {
+        while self.match_next(&[TokenType::PLUS, TokenType::MINUS]) {
             let op = self.previous().clone();
             let xr = self.factor();
             expr = Ok(Box::new(Expr::Binary(expr, op, xr)));
@@ -110,32 +112,28 @@ impl Parser {
     }
 
     fn unary(&mut self) -> Result<Box<Expr>, Error> {
-        let mut expr = self.primary();
         if self.match_next(&[TokenType::BANG, TokenType::MINUS]) {
             let op = self.previous().clone();
             let xr = self.unary();
-            expr = Ok(Box::new(Expr::Unary(op, xr)));
+            return Ok(Box::new(Expr::Unary(op, xr)));
         }
-        expr
+        self.primary()
     }
 
     fn primary(&mut self) -> Result<Box<Expr>, Error> {
-        if self.is_at_end() {
-            return Ok(Box::new(Expr::Literal(Box::new(Object::Null)))); //remove me
-        }
         if self.match_next(&[TokenType::FALSE]) {
-            return Ok(Box::new(Expr::Literal(Box::new(Object::False))));
+            return Ok(Box::new(Expr::Literal(Object::Bool(false))));
         }
         if self.match_next(&[TokenType::TRUE]) {
-            return Ok(Box::new(Expr::Literal(Box::new(Object::True))));
+            return Ok(Box::new(Expr::Literal(Object::Bool(true))));
         }
         if self.match_next(&[TokenType::Null]) {
-            return Ok(Box::new(Expr::Literal(Box::new(Object::Null))));
+            return Ok(Box::new(Expr::Literal(Object::Null)));
         }
 
         if self.match_next(&[TokenType::NUMBER, TokenType::STRING]) {
             let tok = self.previous().clone();
-            return Ok(Box::new(Expr::Literal(Box::new(tok.literal))));
+            return Ok(Box::new(Expr::Literal(tok.literal)));
         }
 
         if self.match_next(&[TokenType::LeftParen]) {
@@ -147,18 +145,15 @@ impl Parser {
         Err(Error::other(format!(
             "{:?} {}",
             self.peek(),
-            "Expect expression."
+            "Expect expression.",
         )))
-        // return Ok(Box::new(Expr::Literal(Box::new(Object::Null))); //remove me
     }
 
     fn consume(&mut self, token_type: TokenType, msg: &str) -> &Token {
         if self.check(&token_type) {
             return self.advance();
         };
-        let t = self.peek().clone();
         panic!("{:?} {}", self.peek(), msg);
-        self.advance() //remove me
     }
 
     fn synchronize(&mut self) {

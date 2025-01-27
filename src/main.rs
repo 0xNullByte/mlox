@@ -1,5 +1,6 @@
 use std::env;
 mod error;
+mod eval;
 mod expr;
 mod mlox;
 mod parser;
@@ -7,7 +8,6 @@ mod scanner;
 mod token;
 use expr::*;
 use mlox::*;
-use token::{Object, Token};
 
 fn main() {
     let args = env::args().collect::<Vec<_>>();

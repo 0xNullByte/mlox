@@ -59,8 +59,7 @@ impl Mlox {
         scanner.scan_tokens();
         let mut parser = Parser::new(scanner.tokens);
         if self.error_handler.had_err {
-            println!("There is a syntax error!");
-            return;
+            todo!("There is a syntax error!");
         }
         parser.parse();
     }
