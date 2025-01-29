@@ -9,7 +9,8 @@ This project is inspired by the book [Crafting Interpreters](https://craftingint
 ✅ **Chapter 5: Representing Code** \
 ✅ **Chapter 6: Parsing Expressions** \
 ✅ **Chapter 7: Evaluating Expressions** \
-🔄 **Chapter 8: Statements and State** \
+✅ **Chapter 8: Statements and State** \
+🔄 **Chapter 9: Control Flow** \
 🚧 Future chapters: Upcoming plans inshallah
 
 # Mlox Grammar:
@@ -18,6 +19,17 @@ This project is inspired by the book [Crafting Interpreters](https://craftingint
 **Binary expressions:*** (`+`, `-`, `*`, `/`) and (`==`, `!=`, `<`, `<=`, `>,` `>=`). \
 **Parentheses:** `(` and `)`. 
 ```
+program        → declaration* EOF ;
+
+declaration    → varDecl
+               | statement ;
+
+statement      → exprStmt
+               | printStmt ;
+
+exprStmt       → expression ";" ;
+printStmt      → "print" expression ";" ;
+
 expression     → literal
                | unary
                | binary

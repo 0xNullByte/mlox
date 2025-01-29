@@ -1,3 +1,23 @@
-// test
-1 + 10 / (2 * 2)
-( 34 * 2 ) + 6 + 9 - 15
+var a = "global a";
+var b = "global b";
+var c = "global c";
+{
+  var a = "outer a";
+  var b = "outer b";
+  {
+    var a = "inner a";
+    print a;
+
+    // Should rise an error, since they're defined outside current scope.
+    // print b;
+    // print c;
+  }
+  print a;
+  print b;
+
+  // Should rise an error, since it defined outside current scope.
+  //print c;
+}
+print a;
+print b;
+print c;

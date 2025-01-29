@@ -68,8 +68,7 @@ impl<'a> Scanner<'a> {
     }
 
     fn add_none_token(&mut self, token_type: TokenType) {
-        self.tokens
-            .push(Token::new(token_type, "".into(), Object::Null, self.line));
+        self.add_token(token_type, Object::Null);
     }
 
     fn add_token(&mut self, token_type: TokenType, literal: Object) {

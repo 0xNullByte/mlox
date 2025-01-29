@@ -1,23 +1,29 @@
+use std::{rc::Rc, sync::Mutex};
+
 use crate::{
+    environ::Environment,
+    stmt::Stmt,
     token::{Object, TokenType},
     Expr,
 };
 
 pub struct Evaluate {
-    expr: Box<Expr>,
+    env: Rc<Mutex<Environment>>,
+    stmts: Rc<Vec<Stmt>>,
 }
 
 impl Evaluate {
-    pub fn new(expr: Box<Expr>) -> Self {
-        Self { expr }
+    pub fn new(stmts: Rc<Vec<Stmt>>, env: Rc<Mutex<Environment>>) -> Self {
+        Self { stmts, env }
     }
 
-    pub fn eval(&self) {
-        let obj = self.eval_expr(&self.expr);
-        println!("{:?}", obj.to_string());
+    pub fn eval(&mut self) {
+        for stmt in self.stmts.clone().iter() {
+            self.eval_stmt(stmt);
+        }
     }
 
-    pub fn eval_expr(&self, expr: &Expr) -> Object {
+    pub fn eval_expr(&mut self, expr: &Expr) -> Object {
         let v = match expr {
             Expr::Literal(v) => v.clone(),
             Expr::Binary(xl, t, xr) => {
@@ -103,7 +109,41 @@ impl Evaluate {
                 }
             }
             Expr::Grouping(x) => self.eval_expr(x.as_ref().unwrap()),
+            Expr::Variable(v) => self.env.lock().unwrap().get(v),
+            Expr::Assign(t, x) => {
+                let obj = self.eval_expr(x.as_ref().unwrap());
+                self.env.lock().unwrap().assign(&t.lexeme, obj.clone());
+                obj
+            }
         };
         v
+    }
+
+    fn eval_stmt(&mut self, stmt: &Stmt) {
+        match stmt {
+            Stmt::PrintStmt(x) => {
+                let value = self.eval_expr(x.as_ref().unwrap());
+                println!("{}", value.to_string())
+            }
+
+            Stmt::ExprStmt(x) => {
+                self.eval_expr(x.as_ref().unwrap());
+            }
+            Stmt::VarStmt(t, x) => {
+                let obj = match x.as_ref() {
+                    Some(v) => self.eval_expr(v.as_ref().unwrap()),
+                    _ => Object::Null,
+                };
+                self.env.lock().unwrap().define(&t.lexeme, obj);
+            }
+            Stmt::BlockStmt(stmts) => {
+                let prev_env = self.env.clone();
+                self.env = Rc::new(Mutex::new(Environment::new()));
+                for stmt in stmts {
+                    self.eval_stmt(&stmt);
+                }
+                self.env = prev_env;
+            }
+        }
     }
 }

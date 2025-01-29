@@ -4,10 +4,12 @@ use crate::token::{Object, Token, TokenType};
 
 #[derive(Debug)]
 pub enum Expr {
+    Assign(Token, Result<Box<Expr>, Error>),
     Binary(Result<Box<Expr>, Error>, Token, Result<Box<Expr>, Error>),
     Grouping(Result<Box<Expr>, Error>),
     Literal(Object),
     Unary(Token, Result<Box<Expr>, Error>),
+    Variable(Token),
 }
 
 impl Expr {
@@ -48,6 +50,7 @@ impl Expr {
                 }
                 format!("({} {})", t.lexeme, x.as_ref().unwrap().to_string())
             }
+            _ => todo!(),
         };
         xs
     }

@@ -1,8 +1,11 @@
-use crate::{error::ScannerError, parser::Parser, scanner::Scanner};
-use std::io::Write;
+use crate::{
+    environ::Environment, error::ScannerError, eval::Evaluate, parser::Parser, scanner::Scanner,
+};
+use std::{io::Write, rc::Rc, sync::Mutex};
 
 pub struct Mlox {
     args: Vec<String>,
+    env: Rc<Mutex<Environment>>,
     error_handler: ScannerError,
 }
 
@@ -10,6 +13,7 @@ impl Mlox {
     pub fn new(args: Vec<String>) -> Self {
         Self {
             args,
+            env: Rc::new(Mutex::new(Environment::new())),
             error_handler: ScannerError::default(),
         }
     }
@@ -28,14 +32,14 @@ impl Mlox {
     }
 
     fn run_file(&mut self) -> u8 {
-        println!("Source file: {}", self.args[1]);
+        println!("[ Source file: {} ]", self.args[1]);
         let src = std::fs::read_to_string(&self.args[1]).expect("Cannot read: {file}");
         self.run(src);
         return 0;
     }
 
     fn run_prompt(&mut self) -> u8 {
-        println!("Prompt is running");
+        println!("[ Prompt is running ]");
         let status = loop {
             let mut buf = String::new();
             print!(">");
@@ -54,13 +58,14 @@ impl Mlox {
     }
 
     fn run(&mut self, src: String) {
-        println!("src: {:?}", &src);
+        // println!("src: {:?}", &src);
         let mut scanner = Scanner::new(&src, &mut self.error_handler);
         scanner.scan_tokens();
         let mut parser = Parser::new(scanner.tokens);
         if self.error_handler.had_err {
             todo!("There is a syntax error!");
         }
-        parser.parse();
+        let stmts = parser.parse();
+        Evaluate::new(Rc::new(stmts), self.env.clone()).eval();
     }
 }
