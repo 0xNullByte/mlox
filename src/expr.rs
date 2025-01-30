@@ -8,6 +8,7 @@ pub enum Expr {
     Binary(Result<Box<Expr>, Error>, Token, Result<Box<Expr>, Error>),
     Grouping(Result<Box<Expr>, Error>),
     Literal(Object),
+    Logical(Result<Box<Expr>, Error>, Token, Result<Box<Expr>, Error>),
     Unary(Token, Result<Box<Expr>, Error>),
     Variable(Token),
 }

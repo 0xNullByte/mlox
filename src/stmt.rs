@@ -7,4 +7,6 @@ pub enum Stmt {
     PrintStmt(Result<Box<Expr>, Error>),
     VarStmt(Token, Option<Result<Box<Expr>, Error>>),
     BlockStmt(Vec<Box<Stmt>>),
+    IfStmt(Result<Box<Expr>, Error>, Box<Stmt>, Option<Box<Stmt>>),
+    WhileStmt(Result<Box<Expr>, Error>, Box<Stmt>),
 }

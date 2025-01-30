@@ -100,10 +100,7 @@ impl Evaluate {
                         _ => todo!(),
                     },
                     TokenType::BANG => match obj {
-                        Object::Null => Object::Bool(true),
-                        Object::Bool(b) => Object::Bool(!b),
-                        Object::Str(s) => Object::Bool(!s.is_empty()),
-                        Object::Num(n) => Object::Bool(n == 0.0),
+                        o @ _ => Object::Bool(!o.is_true()),
                     },
                     _ => todo!(),
                 }
@@ -114,6 +111,15 @@ impl Evaluate {
                 let obj = self.eval_expr(x.as_ref().unwrap());
                 self.env.lock().unwrap().assign(&t.lexeme, obj.clone());
                 obj
+            }
+            Expr::Logical(xl, t, xr) => {
+                let left = self.eval_expr(xl.as_ref().unwrap());
+                if t.token_type == TokenType::OR {
+                    if left.is_true() || !left.is_true() {
+                        return left;
+                    }
+                };
+                self.eval_expr(xr.as_ref().unwrap())
             }
         };
         v
@@ -138,11 +144,25 @@ impl Evaluate {
             }
             Stmt::BlockStmt(stmts) => {
                 let prev_env = self.env.clone();
-                self.env = Rc::new(Mutex::new(Environment::new()));
+                self.env = self.env.clone();
                 for stmt in stmts {
                     self.eval_stmt(&stmt);
                 }
                 self.env = prev_env;
+            }
+            Stmt::IfStmt(cond, then, els) => {
+                let is_cond = self.eval_expr(cond.as_ref().unwrap()).is_true();
+                if is_cond {
+                    self.eval_stmt(then.as_ref());
+                } else if els.is_some() {
+                    self.eval_stmt(els.as_ref().unwrap().as_ref());
+                }
+            }
+
+            Stmt::WhileStmt(cond, body) => {
+                while self.eval_expr(cond.as_ref().unwrap()).is_true() {
+                    self.eval_stmt(&body);
+                }
             }
         }
     }

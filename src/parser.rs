@@ -26,9 +26,20 @@ impl Parser {
     }
 
     fn statement(&mut self) -> Stmt {
+        if self.match_until(&[TokenType::FOR]) {
+            return self.for_statement();
+        }
+        if self.match_until(&[TokenType::IF]) {
+            return self.if_statement();
+        }
         if self.match_until(&[TokenType::PRINT]) {
             return self.print_statement();
         }
+
+        if self.match_until(&[TokenType::WHILE]) {
+            return self.while_statement();
+        }
+
         if self.match_until(&[TokenType::LeftBrace]) {
             return self.block();
         }
@@ -232,7 +243,7 @@ impl Parser {
     }
 
     fn assignment(&mut self) -> Result<Box<Expr>, Error> {
-        let expr = self.equality();
+        let expr = self.logic_or();
         if self.match_until(&[TokenType::EQUAL]) {
             let eq = self.previous().clone();
             let value = self.assignment();
@@ -251,5 +262,90 @@ impl Parser {
         }
         self.consume(TokenType::RightBrace, "Expect '}' after block.");
         return Stmt::BlockStmt(stmts);
+    }
+
+    fn if_statement(&mut self) -> Stmt {
+        self.consume(TokenType::LeftParen, "Expect '(' after 'if'.");
+        let condition = self.expression();
+        self.consume(TokenType::RightParen, "Expect ')' after 'if condition' .");
+        let then_branch = self.statement();
+        let mut else_branch = None;
+        if self.match_until(&[TokenType::ELSE]) {
+            else_branch = Some(Box::new(self.statement()));
+        }
+        Stmt::IfStmt(condition, Box::new(then_branch), else_branch)
+    }
+
+    fn logic_or(&mut self) -> Result<Box<Expr>, Error> {
+        let mut expr = self.logic_and();
+        while self.match_until(&[TokenType::OR]) {
+            let op = self.previous().clone();
+            let right = self.logic_and();
+            expr = Ok(Box::new(Expr::Logical(expr, op, right)));
+        }
+        expr
+    }
+
+    fn logic_and(&mut self) -> Result<Box<Expr>, Error> {
+        let mut expr = self.equality();
+        while self.match_until(&[TokenType::AND]) {
+            let op = self.previous().clone();
+            let right = self.equality();
+            expr = Ok(Box::new(Expr::Logical(expr, op, right)));
+        }
+        expr
+    }
+
+    fn while_statement(&mut self) -> Stmt {
+        self.consume(TokenType::LeftParen, "Expect '(' after 'while'.");
+        let cond = self.expression();
+        self.consume(TokenType::RightParen, "Expect ')' after 'while condition'.");
+        let body = self.statement();
+        Stmt::WhileStmt(cond, Box::new(body))
+    }
+
+    fn for_statement(&mut self) -> Stmt {
+        self.consume(TokenType::LeftParen, "Expect '(' after 'for'.");
+
+        let mut _init = None;
+        if self.match_until(&[TokenType::SEMICOLON]) {
+            _init = None
+        } else if self.match_until(&[TokenType::VAR]) {
+            _init = Some(self.var_declaration());
+        } else {
+            _init = Some(self.expr_statement());
+        }
+
+        let mut cond = None;
+        if !self.check(&TokenType::SEMICOLON) {
+            cond = Some(self.expression());
+        }
+        self.consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+
+        let mut increment = None;
+        if !self.check(&TokenType::RightParen) {
+            increment = Some(self.expression());
+        }
+        self.consume(TokenType::RightParen, "Expect ';' after loop condition.");
+
+        let mut body = Some(self.statement());
+        if increment.is_some() {
+            body = Some(Stmt::BlockStmt(vec![
+                Box::new(body.unwrap()),
+                Box::new(Stmt::ExprStmt(increment.unwrap())),
+            ]));
+        };
+        if cond.is_none() {
+            cond = Some(Ok(Box::new(Expr::Literal(Object::Bool(true)))));
+        }
+        body = Some(Stmt::WhileStmt(cond.unwrap(), Box::new(body.unwrap())));
+
+        if _init.is_some() {
+            body = Some(Stmt::BlockStmt(vec![
+                Box::new(_init.unwrap()),
+                Box::new(body.unwrap()),
+            ]));
+        }
+        body.unwrap()
     }
 }

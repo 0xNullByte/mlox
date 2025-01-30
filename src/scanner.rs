@@ -139,7 +139,7 @@ impl<'a> Scanner<'a> {
             ' ' | '\r' | '\t' => {}
             '\n' => self.line += 1,
 
-            '"' | '\'' => self.string_check(),
+            sc @ ('"' | '\'') => self.string_check(sc),
             '0'..='9' => self.number_check(),
             'a'..='z' | 'A'..='Z' | '_' => self.identifier_check(),
 
@@ -186,8 +186,8 @@ impl<'a> Scanner<'a> {
             .expect("error: scanner.peek")
     }
 
-    fn string_check(&mut self) {
-        while self.peek() != '"' && !self.is_at_end() {
+    fn string_check(&mut self, string_char: char) {
+        while self.peek() != string_char && !self.is_at_end() {
             if self.peek() == '\n' {
                 self.line += 1;
             }

@@ -49,7 +49,7 @@ pub enum TokenType {
     EOF,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Object {
     Str(String),
     Num(f64),
@@ -63,6 +63,14 @@ impl Object {
             Self::Str(v) => v.into(),
             Self::Num(n) => n.to_string(),
             Self::Bool(b) => b.to_string(),
+        }
+    }
+    pub fn is_true(&self) -> bool {
+        match *self {
+            Self::Null => false,
+            Self::Str(ref v) => v.len() > 1,
+            Self::Num(n) => n > 0.0,
+            Self::Bool(b) => b,
         }
     }
 }

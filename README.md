@@ -10,42 +10,38 @@ This project is inspired by the book [Crafting Interpreters](https://craftingint
 ✅ **Chapter 6: Parsing Expressions** \
 ✅ **Chapter 7: Evaluating Expressions** \
 ✅ **Chapter 8: Statements and State** \
-🔄 **Chapter 9: Control Flow** \
+✅ **Chapter 9: Control Flow** \
+🔄 **Chapter 10: Functions** \
 🚧 Future chapters: Upcoming plans inshallah
 
 # Mlox Grammar:
-**Literals:** `Numbers`, `Strings`, `Booleans` and `null`. \
-**Unary expressions:** `!` for not, and `-` to negative. \
-**Binary expressions:*** (`+`, `-`, `*`, `/`) and (`==`, `!=`, `<`, `<=`, `>,` `>=`). \
-**Parentheses:** `(` and `)`. 
 ```
 program        → declaration* EOF ;
 
 declaration    → varDecl
                | statement ;
 
+varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 statement      → exprStmt
-               | printStmt ;
+               | ifStmt
+               | printStmt
+               | whileStmt
+               | block ;
 
 exprStmt       → expression ";" ;
+ifStmt         → "if" "(" expression ")" statement 
+					  ( "else" statement )? ;
 printStmt      → "print" expression ";" ;
+whileStmt      → "while" "(" expression ")" statement ;
+block          → "{" declaration* "}" ;
 
-expression     → literal
-               | unary
-               | binary
-               | grouping ;
+expression     → assignment ;
+assignment     → IDENTIFIER "=" assignment
+               | logic_or ;
 
-literal        → NUMBER | STRING | "true" | "false" | "null" ;
-grouping       → "(" expression ")" ;
-unary          → ( "-" | "!" ) expression ;
-binary         → expression operator expression ;
-operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
-               | "+"  | "-"  | "*" | "/" ;
-```
+logic_or       → logic_and ( "or" logic_and )* ;
+logic_and      → equality ( "and" equality )* ;
 
-# Mlox Precedence Rules:
-```
-expression     → equality ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
@@ -61,8 +57,8 @@ primary        → NUMBER | STRING | "true" | "false" | "null"
         Mlox         |    Rust representation
 ----------------------------------------------------
         Obj          |            <T>
-        null         |            None
-        bool         |            bool
+        Null         |            None
+        Bool         |            bool
         Num          |            f64
         Str          |            String
 ```
